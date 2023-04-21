@@ -1,4 +1,5 @@
-local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua'))()
+
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
 local thumbsDownEmoji = utf8.char(0x1F44E)
 local noEntryEmoji = utf8.char(0x1F6AB)
 local farmerEmoji = utf8.char(0x1F468, 0x200D, 0x1F33D)
@@ -6,13 +7,15 @@ local repeatEmoji = utf8.char(0x1F501)
 local signalStrengthEmoji = utf8.char(0x1F4F6)
 local doorEmoji = utf8.char(0x1F6AA)
 local repeatSingleEmoji = utf8.char(0x1F502)
-local clockwiseVerticalArrowsEmoji = utf8.char(0x1F503)
+local clockwiseVerticalArrowsEmoji = utf8.char(0x1F503) 
 local timerClockEmoji = utf8.char(0x23F2)
 local axeEmoji = utf8.char(0x1FA93)
 local crossedSwordsEmoji = utf8.char(0x2694)
 local rocketEmoji = utf8.char(0x1F680)
 local computerMouseEmoji = utf8.char(0x1F5B1)
 local moneyBagEmoji = utf8.char(0x1F4B0)
+
+local bossDummy = game:GetService("Workspace").Arenas["Nomek Arena"]["Nomek Arena"].BossDummy:FindFirstChild("BOSS_DUMMY")
 
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local Player = game:GetService("Players").LocalPlayer or game:GetService("Players").PlayerAdded:Wait()
@@ -65,22 +68,22 @@ local function Notify(Message, Duration)
 end
 
 local Window = Rayfield:CreateWindow({
-    Name = thumbsDownEmoji .. " L-HUB " .. thumbsDownEmoji .. " | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
-    LoadingTitle = thumbsDownEmoji .. " L-HUB " .. thumbsDownEmoji,
-    LoadingSubtitle = ".L.#5123",
+    Name = thumbsDownEmoji .. " L-HUB REWRITE " .. thumbsDownEmoji .. " | " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
+    LoadingTitle = thumbsDownEmoji .. " L-HUB REWRITE " .. thumbsDownEmoji,
+    LoadingSubtitle = ".L.#5123 x Leous#2495",
     ConfigurationSaving = {
        Enabled = true,
        FolderName = nil, -- Create a custom folder for your hub/game
-       FileName = "L-HUB"
+       FileName = "L-HUB REWRITE"
     },
     Discord = {
        Enabled = true,
        Invite = "srh43uxcVG", -- The Discord invite code, do not include discord.gg/
        RememberJoins = false -- Set this to false to make them join the discord every time they load it up
     },
-    KeySystem = true, -- Set this to true to use our key system
+    KeySystem = false, -- Set this to true to use our key system
     KeySettings = {
-       Title = thumbsDownEmoji .. " L-HUB " .. thumbsDownEmoji,
+       Title = thumbsDownEmoji .. " L-HUB REWRITE " .. thumbsDownEmoji,
        Subtitle = "Key System",
        Note = "Join the discord (discord.gg/srh43uxcVG)",
        FileName = "L-HUBKey",
@@ -92,15 +95,9 @@ local Window = Rayfield:CreateWindow({
  
 
 
-
- local workspace = workspace
- local huge = math.huge
- local Remotes = game:GetService("ReplicatedStorage").Remotes
- 
- local HumanoidRootPart = Player.Character:WaitForChild("HumanoidRootPart")
- 
- local ChildAdded = false
- 
+ getgenv().SelectMobs = ""
+ getgenv().AutoFarm = false
+ getgenv().Tp = false
  local Modes = {"Kill Aura"}
  
  for i,v in pairs(workspace.Maps:GetChildren()) do
@@ -111,109 +108,154 @@ local Window = Rayfield:CreateWindow({
      end
  end
  
+
+ local workspace = workspace
+ local huge = math.huge
+ local Remotes = game:GetService("ReplicatedStorage").Remotes
+ 
+ local HumanoidRootPart = Player.Character:WaitForChild("HumanoidRootPart")
+ 
+ local ChildAdded = false
+ 
+
  
  local Main = Window:CreateTab("Main", 13173891515)
  
- local Section = Main:CreateSection("Farming")
+ local Section = Main:CreateSection("Farming Functions:")
  
- Main:CreateDropdown({
-     Name = axeEmoji .. " Farm",
-     SectionParent = Section,
-     Options = Modes,
-     CurrentOption = "Kill Aura",
-     Flag = "Mode",
-     Callback = function()end,
+
+ local Dropdown = Main:CreateDropdown({
+    Name = axeEmoji .. " Select Enemies:",
+
+    Options = Modes,
+    CurrentOption = "",
+    MultiSelection = false, -- If MultiSelections is allowed
+    Flag = "Mode", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Option)
+    end,
  })
- 
- Main:CreateToggle({
-     Name = crossedSwordsEmoji .. " Auto Attack",
-     SectionParent = Section,
-     CurrentValue = false,
-     Flag = "Attack",
-     Callback = function()end,
- })
- 
- task.spawn(function()
-     while task.wait() do
-         if Rayfield.Flags.Attack.CurrentValue then
-             local Number = huge
-             local Closest
-             
-             for i,v in pairs(workspace.Maps:GetChildren()) do
-                 for i,v in pairs(v.Enemies:GetChildren()) do
-                     local Mode = Rayfield.Flags.Mode.CurrentOption[1]
-                     if Mode == "Kill Aura" or v.Name == Mode and v:FindFirstChild("Torso") and v.Torso.Transparency == 0 then
-                         local Magnitude = (HumanoidRootPart.Position - v.PrimaryPart.Position).Magnitude
-                         if Magnitude < Number then
-                             Number = Magnitude
-                             Closest = v
-                         end
-                     end
-                 end
-             end
-             
-             if Closest then
-                Remotes.EnemyRemotes.AttackEnemy:FireServer(Closest)
-                
-                repeat
-                    if Rayfield.Flags.Teleport.CurrentValue then
-                        HumanoidRootPart.CFrame = Closest.PrimaryPart.CFrame + Closest.PrimaryPart.CFrame.LookVector * -5
-                    end
-                    task.wait() 
-                until not Closest or not Closest.Parent or not Closest:FindFirstChild("Torso") --[[or Closest.Torso.Transparency ~= 0]] or not Rayfield.Flags.Attack.CurrentValue or ChildAdded
-                
-                if ChildAdded then
-                    ChildAdded = false
-                end
-            end
-         end
-     end
- end)
+
 
  Main:CreateToggle({
-    Name = rocketEmoji .. " Téléportation",
-    SectionParent = Section,
+    Name = rocketEmoji .. " Teleport To Enemies",
+
     CurrentValue = false,
     Flag = "Teleport",
-    Callback = function()end,
+    Callback = function(bool)
+        Rayfield.Flags.Teleport.CurrentValue = bool
+      while task.wait() do 
+         if   Rayfield.Flags.Teleport.CurrentValue == true then 
+            local Remotes = game:GetService("ReplicatedStorage").Remotes
+  local Player = game:GetService("Players").LocalPlayer or game:GetService("Players").PlayerAdded:Wait()
+  local HumanoidRootPart = Player.Character:WaitForChild("HumanoidRootPart")
+   local Number = math.huge
+              local Closest
+              
+              for i,v in pairs(workspace.Maps:GetChildren()) do
+                  for i,v in pairs(v.Enemies:GetChildren()) do
+                    local Mode = Rayfield.Flags.Mode.CurrentOption[1]
+                      if Mode == "Kill Aura" or v.Name == Mode and v:FindFirstChild("Torso") and v.Torso.Transparency == 0 then
+                          local Magnitude = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v:FindFirstChildOfClass("Part").Position).Magnitude
+                          if Magnitude < Number then
+                              Number = Magnitude
+                              Closest = v
+                          end
+                      end	
+                  end
+              end
+  
+              if Closest then
+                HumanoidRootPart.CFrame = Closest.PrimaryPart.CFrame + Closest.PrimaryPart.CFrame.LookVector * -5
+              end 
+    else
+        wait()
+        break
+    end 
+end 
+    end,
 })
 
- 
- Main:CreateToggle({
-     Name = computerMouseEmoji .. " Auto Click",
-     SectionParent = Section,
-     CurrentValue = false,
-     Flag = "Click",
-     Callback = function()end,
- })
- 
- task.spawn(function()
-     while task.wait() do
-         if Rayfield.Flags.Click.CurrentValue then
-             Remotes.EnemyRemotes.AttackClick:InvokeServer()
-         end
-     end
- end)
-
-
- local character = game.Players.LocalPlayer.Character
- local humanoid = character:WaitForChild("Humanoid")
- local rootPart = character:WaitForChild("HumanoidRootPart")
- local dropsFolder = game:GetService("Workspace").Drops 
 
  Main:CreateToggle({
+    Name = crossedSwordsEmoji .. " Auto Attack",
+
+    CurrentValue = false,
+    Flag = "Attack",
+    Callback = function(bool)
+        Rayfield.Flags.Attack.CurrentValue = bool
+       while task.wait() do
+           if  Rayfield.Flags.Attack.CurrentValue == true   then
+              local workspace = workspace
+  local Remotes = game:GetService("ReplicatedStorage").Remotes
+  local Player = game:GetService("Players").LocalPlayer or game:GetService("Players").PlayerAdded:Wait()
+  local HumanoidRootPart = Player.Character:WaitForChild("HumanoidRootPart")
+   local Number = math.huge
+              local Closest
+              
+              for i,v in pairs(workspace.Maps:GetChildren()) do
+                  for i,v in pairs(v.Enemies:GetChildren()) do
+                    local Mode = Rayfield.Flags.Mode.CurrentOption[1]
+                      if Mode == "Kill Aura" or v.Name == Mode and v:FindFirstChild("Torso") and v.Torso.Transparency == 0 then
+                          local Magnitude = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v:FindFirstChildOfClass("Part").Position).Magnitude
+                          if Magnitude < Number then
+                              Number = Magnitude
+                              Closest = v
+                          end
+                      end	
+                  end
+              end
+  
+              if Closest then
+              for i,v in pairs(game:GetService("Workspace").HeroFolder:GetChildren()) do 
+                     if v:IsA("Model") and v:FindFirstChild("Owner") and v:FindFirstChild("Enemy")  then 
+                         if v.Enemy.Value == nil then 
+                 Remotes.EnemyRemotes.AttackEnemy:FireServer(Closest)
+                     end 
+                 end
+               end 
+           end 
+              else
+                wait()
+                break
+                end
+              end
+   end,
+})
+
+
+Main:CreateToggle({
+    Name = computerMouseEmoji .. " Auto Click",
+
+    CurrentValue = false,
+    Flag = "Click",
+    Callback = function(bool)
+        Rayfield.Flags.Click.CurrentValue = bool 
+         while task.wait() do 
+             if  Rayfield.Flags.Click.CurrentValue == true then 
+                Remotes.EnemyRemotes.AttackClick:InvokeServer()
+             else
+                wait()
+                break
+             end 
+            end 
+    end,
+})
+
+local character = game.Players.LocalPlayer.Character
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+local dropsFolder = game:GetService("Workspace").Drops 
+
+Main:CreateToggle({
     Name = moneyBagEmoji .. " Auto Collect",
-    SectionParent = Section,
+
     CurrentValue = false,
     Flag = "Collect",
-    Callback = function()end,
-})
-
-local tweenService = game:GetService("TweenService")
-
-task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.Collect.CurrentValue then
+    Callback = function(bool)
+        getgenv().Collects = bool 
+        while task.wait() do 
+            if Collects == true then 
+                local tweenService = game:GetService("TweenService")
             local closestCoin = nil
             local closestDistance = math.huge
             for _, coin in pairs(dropsFolder:GetChildren()) do
@@ -235,105 +277,105 @@ task.spawn(function()
             else
                 wait(1)
             end
-        end
-    end
-end)
+else
+    wait()
+    break
+end 
+end 
 
+    end,
+})
 
 Main:CreateToggle({
     Name = farmerEmoji .. " Auto Quest Farm",
-    SectionParent = Section,
+
     CurrentValue = false,
     Flag = "FarmQuest",
-    Callback = function()end,
-})
-
-
-
-task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.FarmQuest.CurrentValue then
-            local function findTaskDescText()
-                local text = ""
-                while text == "" do
-                    local objectiveList = game:GetService("Players").LocalPlayer.PlayerGui.HUD.QuestFrame.ObjectiveList
-                    local taskDescs = {}
-                    for _, textLabel in pairs(objectiveList:GetChildren()) do
-                        if textLabel:IsA("TextLabel") then
-                            for _, descendant in pairs(textLabel:GetDescendants()) do
-                                if descendant.Name == "TaskDesc" and descendant:IsA("TextLabel") then
-                                    table.insert(taskDescs, descendant)
+    Callback = function(bool)
+        getgenv().FarmQuests = bool 
+        while task.wait() do 
+            if FarmQuests == true then 
+                local function findTaskDescText()
+                    local text = ""
+                    while text == "" do
+                        local objectiveList = game:GetService("Players").LocalPlayer.PlayerGui.HUD.QuestFrame.ObjectiveList
+                        local taskDescs = {}
+                        for _, textLabel in pairs(objectiveList:GetChildren()) do
+                            if textLabel:IsA("TextLabel") then
+                                for _, descendant in pairs(textLabel:GetDescendants()) do
+                                    if descendant.Name == "TaskDesc" and descendant:IsA("TextLabel") then
+                                        table.insert(taskDescs, descendant)
+                                    end
                                 end
                             end
                         end
-                    end
-            
-                    for _, taskDesc in pairs(taskDescs) do
-                        local current, max = taskDesc.Text:match("%[(%d+)/(%d+)%]")
-                        current = tonumber(current)
-                        max = tonumber(max)
-                        if current and max and current < max then
-                            text = taskDesc.Text
-                            break
-                        end
-                    end
-            
-                    if text == "" then wait(1) end
-                end
-            
-                return text
-            end
-            
-            local text = findTaskDescText()
-            print("Text found:", text)
-            
-            local current, max = text:match("%[(%d+)/(%d+)%]")
-            current = tonumber(current)
-            max = tonumber(max)
-            
-            if current and max and current < max then
-                local mobName = text:gsub("%s*%[[^%]]+%]%s*", "")
-                local mobNameLower = mobName:lower()
-                local mobNameFormatted = mobName:gsub("(%a)([%w_']*)", function(first, rest) return first:upper()..rest:lower() end)
-            
-                local mapsFolder = game:GetService("Workspace").Maps
-                local player = game.Players.LocalPlayer.Character
-                local HumanoidRootPart = player.HumanoidRootPart
-            
-                for _, map in pairs(mapsFolder:GetChildren()) do
-                    local enemiesFolder = map:FindFirstChild("Enemies")
-                    if enemiesFolder then
-                        for _, enemy in pairs(enemiesFolder:GetChildren()) do
-                            if enemy.Name:lower() == mobNameLower then
-                                local primaryPart = enemy.PrimaryPart or enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("Torso")
-                                if primaryPart then
-                                    HumanoidRootPart.CFrame = primaryPart.CFrame
-            
-                                    -- Attack the enemy using the provided code
-                                    local args = {
-                                        [1] = workspace.Maps[map.Name].Enemies[mobNameFormatted]
-                                    }
-            
-                                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("EnemyRemotes"):WaitForChild("AttackEnemy"):FireServer(unpack(args))
-                                end
+                
+                        for _, taskDesc in pairs(taskDescs) do
+                            local current, max = taskDesc.Text:match("%[(%d+)/(%d+)%]")
+                            current = tonumber(current)
+                            max = tonumber(max)
+                            if current and max and current < max then
+                                text = taskDesc.Text
                                 break
                             end
                         end
+                
+                        if text == "" then wait(1) end
                     end
+                
+                    return text
                 end
+                
+                local text = findTaskDescText()
+                print("Text found:", text)
+                
+                local current, max = text:match("%[(%d+)/(%d+)%]")
+                current = tonumber(current)
+                max = tonumber(max)
+                
+                if current and max and current < max then
+                    local mobName = text:gsub("%s*%[[^%]]+%]%s*", "")
+                    local mobNameLower = mobName:lower()
+                    local mobNameFormatted = mobName:gsub("(%a)([%w_']*)", function(first, rest) return first:upper()..rest:lower() end)
+                
+                    local mapsFolder = game:GetService("Workspace").Maps
+                    local player = game.Players.LocalPlayer.Character
+                    local HumanoidRootPart = player.HumanoidRootPart
+                
+                    for _, map in pairs(mapsFolder:GetChildren()) do
+                        local enemiesFolder = map:FindFirstChild("Enemies")
+                        if enemiesFolder then
+                            for _, enemy in pairs(enemiesFolder:GetChildren()) do
+                                if enemy.Name:lower() == mobNameLower then
+                                    local primaryPart = enemy.PrimaryPart or enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("Torso")
+                                    if primaryPart then
+                                        HumanoidRootPart.CFrame = primaryPart.CFrame
+                
+                                        -- Attack the enemy using the provided code
+                                        local args = {
+                                            [1] = workspace.Maps[map.Name].Enemies[mobNameFormatted]
+                                        }
+                
+                                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("EnemyRemotes"):WaitForChild("AttackEnemy"):FireServer(unpack(args))
+                                    end
+                                    break
+                                end
+                            end
+                        end
+                    end
+                wait(1)
             end
-wait(1)
+        else
+            wait()
+            break
         end
     end
-end)
-
-
+    end,
+})
 
 local FuseTab = Window:CreateTab("Fuse", 13173917203)
  
 local Section = FuseTab:CreateSection("Change the name of the pet if you have the same name for several pets and look F9 or copie paste")
-
-
 
 
 local Input = FuseTab:CreateInput({
@@ -354,11 +396,7 @@ local Input = FuseTab:CreateInput({
     Name = "Get ID pet",
     Info = "Button info/Description.", -- Speaks for itself, Remove if none.
     Interact = 'Press it',
-    Callback = function()
-
-
-
-
+    Callback = function()   
 
         local InventoryNest = game:GetService("Players").LocalPlayer.PlayerGui.InventoryUI.MainFrame.Outline.InnerFrame.InventoryScroll.InventoryNest
 
@@ -403,323 +441,359 @@ local Slider = FuseTab:CreateSlider({
     Info = "Toggle info/Description.",
     CurrentValue = false,
     Flag = "ToggleFuse",
-    Callback = function()end,
-})
-
-
- task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.ToggleFuse.CurrentValue then
-
-
-
-
+    Callback = function(bool)
+     getgenv().AutoFuse = bool 
+      while task.wait() do 
+         if AutoFuse == true then 
             for i = 1, 500 do
-                    -- Utilisation de la variable selectedOption dans le code
-                    local args = {
-                    [1] = _G.Fuse,
-                    [2] = {
-                        [1] = i
-                    }
+                local args = {
+                [1] = _G.Fuse,
+                [2] = {
+                    [1] = i
                 }
+            }
 
-                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("InventoryRemotes"):WaitForChild("FuseHeroes"):FireServer(unpack(args))
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("InventoryRemotes"):WaitForChild("FuseHeroes"):FireServer(unpack(args))
 
-                wait(10)
-            end
+            wait(10)
         end
-    end
-end)
+         else
+            wait()
+            break
+         end 
+        end 
+    end,
+})
 
 
 
 local Raid = Window:CreateTab("Raid", 13173953350)
  
-local Section = Raid:CreateSection("Raid Auto Farm broken")
+local Section = Raid:CreateSection("Raid Auto Farm:")
+
+local Button = Raid:CreateButton({
+    Name = "Set Your Position After Done Area",
+    Callback = function()
+        getgenv().SavedPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame 
+        game:GetService("StarterGui"):SetCore("SendNotification",{
+           Title = "Position Alert", -- Required
+           Text = "Successfully Set Your Current Position.", -- Required
+        })
+        
+    end,
+ })
 
 
 Raid:CreateToggle({
-    Name = "Auto Tp",
+    Name = "Auto Teleport When Raid Appears",
     Info = "Toggle info/Description.",
     CurrentValue = false,
     Flag = "TpRaid",
-    Callback = function()end,
-})
-
-
-
-
-
-
-task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.TpRaid.CurrentValue then
-
-            local textLabel = game:GetService("Workspace").Lobbies["Arena Plaza"]["Arena Plaza"].ArenaTeleporters["Nomek Arena"].TimerPart.ArenaOpenTimer.TextLabel
-            local Teleporter = game:GetService("Workspace").Lobbies["Arena Plaza"]["Arena Plaza"].ArenaTeleporters["Nomek Arena"].Teleporter
-            
-            if string.find(textLabel.Text, "JOIN NOW!") then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = Teleporter.CFrame
-                wait(5)
-    
-                local args = {
-                    [1] = "Nomek Arena"
-                }
-                
-                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("JoinArena"):InvokeServer(unpack(args))
-                
-                
-                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("GetArenaName"):InvokeServer()
-                
-                
-                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("LocationRemotes"):WaitForChild("RespawnRequest"):InvokeServer()
-                wait(100)
-            end
-        end
-    end
-end)
-
-
-Raid:CreateToggle({
-    Name = "Auto Farm Raid",
-    Info = "Toggle info/Description.",
-    CurrentValue = false,
-    Flag = "Raid",
-    Callback = function()end,
-})
-
-task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.Raid.CurrentValue then
-            local character = game.Players.LocalPlayer.Character
-            local rootPart = character:FindFirstChild("HumanoidRootPart")
-            local closestEnemy
-            local closestDistance = math.huge
-            local enemyName
-            
-            for _, zone in pairs(game:GetService("Workspace").Arenas["Nomek Arena"]["Nomek Arena"].Zones:GetChildren()) do
-                if zone:FindFirstChild("Enemies") then
-                    for _, enemy in pairs(zone.Enemies:GetChildren()) do
-                        local distance = (rootPart.Position - enemy.PrimaryPart.Position).magnitude
-                        if distance < closestDistance then
-                            closestDistance = distance
-                            closestEnemy = enemy
-                            enemyName = enemy.Name
-                        end
-                    end
-                end
-            end
-            
-            if closestEnemy then
-                rootPart.CFrame = closestEnemy.PrimaryPart.CFrame
-                local args = { [1] = closestEnemy }
-                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("EnemyRemotes"):WaitForChild("AttackEnemy"):FireServer(unpack(args))
-            else
-                wait(3)
-                local bossDummy = game:GetService("Workspace").Arenas["Nomek Arena"]["Nomek Arena"].BossDummy:FindFirstChild("BOSS_DUMMY")
-                if not bossDummy then
-                    wait(3)
-                    -- recommencer à attaquer les ennemis du début
-                else
-                    rootPart.CFrame = bossDummy.PrimaryPart.CFrame
-                    local args = { [1] = bossDummy }
-                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("EnemyRemotes"):WaitForChild("AttackEnemy"):FireServer(unpack(args))
-                end
-            end
+    Callback = function(bool)
+        Rayfield.Flags.TpRaid.CurrentValue = bool
+        while task.wait() do 
+           if Rayfield.Flags.TpRaid.CurrentValue == true then 
+        local textLabel = game:GetService("Workspace").Lobbies["Arena Plaza"]["Arena Plaza"].ArenaTeleporters["Nomek Arena"].TimerPart.ArenaOpenTimer.TextLabel
+        local Teleporter = game:GetService("Workspace").Lobbies["Arena Plaza"]["Arena Plaza"].ArenaTeleporters["Nomek Arena"].Teleporter
         
+        if string.find(textLabel.Text, "JOIN NOW!") then
+            -- Rayfield.Flags.Teleport.CurrentValue = false
+           --  Rayfield.Flags.Attack.CurrentValue = false
+            wait(2)
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = Teleporter.CFrame
+            wait(3)
+
+            local args = {
+                [1] = "Nomek Arena"
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("JoinArena"):InvokeServer(unpack(args))
+            
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("GetArenaName"):InvokeServer()
+            
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("LocationRemotes"):WaitForChild("RespawnRequest"):InvokeServer()
+            wait(100)
+        end 
+    else
+        wait()
+        break
+    end 
+end 
+    end,
+})
+
+
+
+
+Raid:CreateToggle({
+    Name = "AutoFarm Raids",
+    Info = "Toggle info/Description.",
+    CurrentValue = false,
+    Flag = "AutoRaid",
+    Callback = function(bool)
+         
+
+  
+        Rayfield.Flags.AutoRaid.CurrentValue = bool 
+ while task.wait() do 
+    if  Rayfield.Flags.AutoRaid.CurrentValue == true then 
+        pcall(function()
+     local character = game.Players.LocalPlayer.Character
+     local rootPart = character:FindFirstChild("HumanoidRootPart")
+     local closestEnemy
+     local closestDistance = math.huge
+     local enemyName
+     local bossDummy = game:GetService("Workspace").Arenas["Nomek Arena"]["Nomek Arena"].BossDummy:FindFirstChild("BOSS_DUMMY")
+
+     for _, zone in pairs(game:GetService("Workspace").Arenas["Nomek Arena"]["Nomek Arena"].Zones:GetChildren()) do
+         if zone:FindFirstChild("Enemies") then
+             for _, enemy in pairs(zone.Enemies:GetChildren()) do
+                 local distance = (rootPart.Position - enemy:WaitForChild("HumanoidRootPart").Position).magnitude
+                 if distance < closestDistance then
+                     closestDistance = distance
+                     closestEnemy = enemy
+                     enemyName = enemy.Name
+                 end
+             end
+         end
+     end
+         
+     if closestEnemy and not game:GetService("Workspace").Arenas["Nomek Arena"]["Nomek Arena"].BossDummy:FindFirstChild("BOSS_DUMMY") then -- find closest enemies 
+         rootPart.CFrame = closestEnemy:FindFirstChildOfClass("Part").CFrame
+         local args = { [1] = closestEnemy }
+         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("EnemyRemotes"):WaitForChild("AttackEnemy"):FireServer(unpack(args))
+     elseif not  game:GetService("Workspace").Arenas["Nomek Arena"]["Nomek Arena"].BossDummy:FindFirstChild("BOSS_DUMMY") then
+       
+        wait(3)
+        else
+         rootPart.CFrame = bossDummy:GetModelCFrame()
+             task.wait(.5)
+             local args = { [1] = bossDummy }
+             game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("EnemyRemotes"):WaitForChild("AttackEnemy"):FireServer(unpack(args))
+         end
+     
+         --  \\ Back To Saved Pos // -- 
+  if game:GetService("Players").LocalPlayer.PlayerGui.ArenaUI.VictoryRewards.Visible == true or game:GetService("Players").LocalPlayer.PlayerGui.ArenaUI.FailureRewards.Visible == true and getgenv().SavedPosition ~= nil then 
+     task.wait(.5)
+     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = getgenv().SavedPosition
+    -- Rayfield.Flags.Teleport.CurrentValue = true
+     -- Rayfield.Flags.Attack.CurrentValue = true
+  end 
+     task.wait(math.huge)
+     end)
+    else
+     wait()
+     break
+ end 
+    end 
+        end,
+    })
     
-            wait(math.huge)
-        end
-    end
-end)
+    local Section = Raid:CreateSection("Auto Buy Raid Shop")
 
-local Section = Raid:CreateSection("Auto Buy Raid Shop")
+    Raid:CreateToggle({
+        Name = "Auto Buy Yen",
+        Info = "Toggle info/Description.",
+        CurrentValue = false,
+        Flag = "Yen",
+        Callback = function(bool)
+            getgenv().Yen = bool
+            while task.wait() do 
+                if Yen == true then 
+                    local args = {
+                        [1] = "Yen"
+                    }
+                    
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("PurchaseArenaItem"):InvokeServer(unpack(args))
+                    
+                else
+                    wait()
+                     break
+               end 
+           end 
+        end,
+    })
+    
 
-Raid:CreateToggle({
-    Name = "Auto Buy Yen",
-    Info = "Toggle info/Description.",
-    CurrentValue = false,
-    Flag = "Yen",
-    Callback = function()end,
-})
+    
+    Raid:CreateToggle({
+        Name = "Auto Buy Damage",
+        Info = "Toggle info/Description.",
+        CurrentValue = false,
+        Flag = "Damage",
+        Callback = function(bool)
+            getgenv().Dmg = bool
+            while task.wait() do 
+                if Dmg == true then 
+                    local args = {
+                        [1] = "Damage"
+                    }
+                    
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("PurchaseArenaItem"):InvokeServer(unpack(args))
+                    
+                else
+                    wait()
+                     break
+               end 
+           end 
+        end,
+    })
 
-task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.Yen.CurrentValue then
+    
+    Raid:CreateToggle({
+        Name = "Auto Buy Luck",
+        Info = "Toggle info/Description.",
+        CurrentValue = false,
+        Flag = "Luck",
+        Callback = function(bool)
+            getgenv().Luck = bool
+            while task.wait() do 
+                if Luck == true then 
+                    local args = {
+                        [1] = "Luck"
+                    }
+                    
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("PurchaseArenaItem"):InvokeServer(unpack(args))            
+        
+                else
+                    wait()
+                     break
+               end 
+           end 
+        end,
+    })
+    
+    
+    Raid:CreateToggle({
+        Name = "Auto Buy Cursed Note",
+        Info = "Toggle info/Description.",
+        CurrentValue = false,
+        Flag = "Cursed",
+        Callback = function(bool)
+            getgenv().Curseds = bool
+            while task.wait() do 
+                if Curseds  == true then 
+                    local args = {
+                        [1] = "CursedNotes"
+                    }
+                    
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("PurchaseArenaItem"):InvokeServer(unpack(args))
+                    
+                else
+                    wait()
+                     break
+               end 
+           end 
+        end,
+    })
+    
 
-            local args = {
-                [1] = "Yen"
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("PurchaseArenaItem"):InvokeServer(unpack(args))
-            
-        end
-    end
-end)
+    Raid:CreateToggle({
+        Name = "Auto Buy Super Luck",
+        Info = "Toggle info/Description.",
+        CurrentValue = false,
+        Flag = "SuperLuck",
+        Callback = function(bool)
+            getgenv().SuperLucks = bool
+            while task.wait() do 
+                if SuperLucks == true then 
+                    local args = {
+                        [1] = "SuperLuck"
+                    }
+                    
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("PurchaseArenaItem"):InvokeServer(unpack(args))
+                    
+                else
+                    wait()
+                     break
+               end 
+           end 
+        end,
+    })
+    
 
-Raid:CreateToggle({
-    Name = "Auto Buy Damage",
-    Info = "Toggle info/Description.",
-    CurrentValue = false,
-    Flag = "Damage",
-    Callback = function()end,
-})
+    Raid:CreateToggle({
+        Name = "Auto Buy Shiny Potion",
+        Info = "Toggle info/Description.",
+        CurrentValue = false,
+        Flag = "Shiny",
+        Callback = function(bool)
+            getgenv().Shinys = bool
+            while task.wait() do 
+                if Shinys == true then 
 
-task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.Damage.CurrentValue then
+                    local args = {
+                        [1] = "Shiny"
+                    }
+                    
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("PurchaseArenaItem"):InvokeServer(unpack(args))            
+        
+                else
+                    wait()
+                     break
+               end 
+           end 
+        end,
+    })
+    
+    Raid:CreateToggle({
+        Name = "Auto Buy Pity Potion Secret",
+        Info = "Toggle info/Description.",
+        CurrentValue = false,
+        Flag = "Secret",
+        Callback = function(bool)
+            getgenv().Secrets = bool
+            while task.wait() do 
+                if Secrets == true then 
+                    local args = {
+                        [1] = "SecretPity"
+                    }
+                    
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("PurchaseArenaItem"):InvokeServer(unpack(args))   
+                else
+                    wait()
+                     break
+               end 
+           end 
+        end,
+    })
+    
+    
+    local Eggs = Window:CreateTab("Open", 13173906640)
+     
+    local Section = Eggs:CreateSection("You have to be in the world where you want to open")
+    
+    
+    
+    
+    
+    
+    Eggs:CreateToggle({
+        Name = "Auto Open",
+        Info = "Toggle info/Description.",
+        CurrentValue = false,
+        Flag = "Open",
+        Callback = function(bool)
+         getgenv().AutoOpenEgg = bool
+         while task.wait() do 
+             if AutoOpenEgg == true then 
+                local Remotes = game.ReplicatedStorage.Remotes
+                Remotes.InventoryRemotes.HeroRoll:InvokeServer()
+                else
+                     wait()
+                      break
+                end 
+            end 
+        end,
+    })
+    
+    
 
-            local args = {
-                [1] = "Damage"
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("PurchaseArenaItem"):InvokeServer(unpack(args))
-            
-        end
-    end
-end)
+    
 
-Raid:CreateToggle({
-    Name = "Auto Buy Luck",
-    Info = "Toggle info/Description.",
-    CurrentValue = false,
-    Flag = "Luck",
-    Callback = function()end,
-})
-
-task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.Luck.CurrentValue then
-
-            local args = {
-                [1] = "Luck"
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("PurchaseArenaItem"):InvokeServer(unpack(args))            
-
-        end
-    end
-end)
-
-Raid:CreateToggle({
-    Name = "Auto Buy Cursed Note",
-    Info = "Toggle info/Description.",
-    CurrentValue = false,
-    Flag = "Cursed",
-    Callback = function()end,
-})
-
-task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.Cursed.CurrentValue then
-
-            local args = {
-                [1] = "CursedNotes"
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("PurchaseArenaItem"):InvokeServer(unpack(args))
-            
-        end
-    end
-end)
-
-Raid:CreateToggle({
-    Name = "Auto Buy Super Luck",
-    Info = "Toggle info/Description.",
-    CurrentValue = false,
-    Flag = "SuperLuck",
-    Callback = function()end,
-})
-
-task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.SuperLuck.CurrentValue then
-
-            local args = {
-                [1] = "SuperLuck"
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("PurchaseArenaItem"):InvokeServer(unpack(args))
-            
-        end
-    end
-end)
-
-Raid:CreateToggle({
-    Name = "Auto Buy Shiny Potion",
-    Info = "Toggle info/Description.",
-    CurrentValue = false,
-    Flag = "Shiny",
-    Callback = function()end,
-})
-
-task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.Shiny.CurrentValue then
-
-            local args = {
-                [1] = "Shiny"
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("PurchaseArenaItem"):InvokeServer(unpack(args))            
-
-        end
-    end
-end)
-
-
-Raid:CreateToggle({
-    Name = "Auto Buy Pity Potion Secret",
-    Info = "Toggle info/Description.",
-    CurrentValue = false,
-    Flag = "Secret",
-    Callback = function()end,
-})
-
-task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.Secret.CurrentValue then
-            
-            local args = {
-                [1] = "SecretPity"
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ArenaRemotes"):WaitForChild("PurchaseArenaItem"):InvokeServer(unpack(args))   
-
-        end
-    end
-end)
-
-local Eggs = Window:CreateTab("Open", 13173906640)
- 
-local Section = Eggs:CreateSection("You have to be in the world where you want to open")
-
-
-
-
-
-
-Eggs:CreateToggle({
-    Name = "Auto Open",
-    Info = "Toggle info/Description.",
-    CurrentValue = false,
-    Flag = "Open",
-    Callback = function()end,
-})
-
-
-local Remotes = game.ReplicatedStorage.Remotes
-
-task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.Open.CurrentValue then
-            Remotes.InventoryRemotes.HeroRoll:InvokeServer()
-        end
-    end
-end)
-
-
-local Misc = Window:CreateTab("Misc", 13174056924)
+    local Misc = Window:CreateTab("Misc", 13174056924)
 
 local Section = Misc:CreateSection("It doesn't all work")
 
@@ -790,20 +864,23 @@ Misc:CreateToggle({
     Info = "Toggle info/Description.",
     CurrentValue = false,
     Flag = "Areas",
-    Callback = function()end,
+    Callback = function(bool)
+        getgenv().Areass = bool 
+        while task.wait() do 
+            if Areass == true then 
+                for i,v in pairs(workspace.Maps:GetChildren()) do
+                    Remotes.LocationRemotes.LocationPurchase:InvokeServer(v.Name)
+                end
+    
+            else
+               wait()
+               break
+            end 
+           end 
+    end,
 })
 
-task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.Areas.CurrentValue then
 
-            for i,v in pairs(workspace.Maps:GetChildren()) do
-                Remotes.LocationRemotes.LocationPurchase:InvokeServer(v.Name)
-            end
-
-        end
-    end
-end)
 
 
 
@@ -812,22 +889,23 @@ Misc:CreateToggle({
     Info = "Toggle info/Description.",
     CurrentValue = false,
     Flag = "Claim",
-    Callback = function()end,
+    Callback = function(bool)
+        getgenv().Upgrades = bool 
+        while task.wait() do 
+            if Upgrades == true then 
+                for i,v in pairs(Player.PlayerGui.UpgradesUI.MainFrame.BlueOutline.MainFrame.UpgradesScroll:GetChildren()) do
+                    if v.ClassName == "Frame" then
+                        Remotes.UpgradesRemotes.ClaimUpgrade:InvokeServer(v.Name.." "..v.Frame.Button.UpgradeName.Text:split(" ")[2])
+                    end
+                end
+            else
+               wait()
+               break
+            end 
+           end 
+    end,
 })
 
-task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.Claim.CurrentValue then
-
-            for i,v in pairs(Player.PlayerGui.UpgradesUI.MainFrame.BlueOutline.MainFrame.UpgradesScroll:GetChildren()) do
-                if v.ClassName == "Frame" then
-                    Remotes.UpgradesRemotes.ClaimUpgrade:InvokeServer(v.Name.." "..v.Frame.Button.UpgradeName.Text:split(" ")[2])
-                end
-            end
-
-        end
-    end
-end)
 
 
 
@@ -836,21 +914,23 @@ Misc:CreateToggle({
     Info = "Toggle info/Description.",
     CurrentValue = false,
     Flag = "Quests",
-    Callback = function()end,
+    Callback = function(bool)
+        getgenv().Quests = bool 
+        while task.wait() do 
+            if Quests == true then 
+                for i,v in pairs(workspace.Maps:GetChildren()) do
+                    Remotes.QuestRemotes.RequestQuest:FireServer(v.Name)
+                    Remotes.QuestRemotes.ClaimQuestReward:InvokeServer(v.Name)
+                end
+    
+            else
+               wait()
+               break
+            end 
+           end 
+    end,
 })
 
-task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.Quests.CurrentValue then
-
-            for i,v in pairs(workspace.Maps:GetChildren()) do
-                Remotes.QuestRemotes.RequestQuest:FireServer(v.Name)
-                Remotes.QuestRemotes.ClaimQuestReward:InvokeServer(v.Name)
-            end
-
-        end
-    end
-end)
 
 
 Misc:CreateToggle({
@@ -858,25 +938,19 @@ Misc:CreateToggle({
     Info = "Toggle info/Description.",
     CurrentValue = false,
     Flag = "Best",
-    Callback = function()end,
-})
-
-
-
-task.spawn(function()
-    while task.wait() do
-        if Rayfield.Flags.Best.CurrentValue then
-
+    Callback = function(bool)
+     getgenv().EquipBest = bool 
+     while task.wait() do 
+         if EquipBest == true then 
             Remotes.HeroRemotes.EquipBest:FireServer()
 
-
-        end
-    end
-end)
-
-
-
-
+         else
+            wait()
+            break
+         end 
+        end 
+    end,
+})
 
 
 
